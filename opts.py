@@ -78,6 +78,9 @@ parser.add_argument('--save_model_path', default="/home/ange/project-2022/tsn-20
 # 控制使用对比损失
 parser.add_argument('--contrastive', default=False, type=bool, help='whether add a contrastive loss')
 
+# 反向flow图像训练和验证的视频信息列表
+parser.add_argument('--back_train', default='/home/ange/projects/temporal-segment-networks/data/back_new_ucf101_flow_train_split_1.txt', type=str, help='the txt file of backforward flow')
+parser.add_argument('--back_val', default='/home/ange/projects/temporal-segment-networks/data/back_new_ucf101_flow_val_split_1.txt', type=str, help='the txt file of backforward flow')
 
 
 

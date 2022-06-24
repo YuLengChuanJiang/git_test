@@ -180,7 +180,7 @@ class VideoRecord_Contrastive(object):
 #         return len(self.video_list)
 
 class TSNDataSet(data.Dataset):
-    def __init__(self, root_path, list_file,args,
+    def __init__(self, root_path, list_file, args,
                  num_segments=3, new_length=1, modality='RGB',
                  image_tmpl='img_{:05d}.jpg', transform=None,
                  force_grayscale=False, random_shift=True, test_mode=False):
@@ -195,6 +195,9 @@ class TSNDataSet(data.Dataset):
         self.random_shift = random_shift
         self.test_mode = test_mode
         self.args = args
+        self.back_train = ''  # 设置类属性 back_train代表反向flow的路径 设置为空
+        if args.back_train:  # 根据参数是否传入赋予值
+            self.back_train = args.back_train
 
         if self.modality == 'RGBDiff':
             self.new_length += 1        # Diff needs one more image to calculate diff
@@ -217,6 +220,8 @@ class TSNDataSet(data.Dataset):
 
     def _parse_list(self):  # 此函数是处理正常的TSN数据
         self.video_list = [VideoRecord(x.strip().split(' ')) for x in open(self.list_file)]
+        if self.back_train and self.modality == 'Flow':  # 同时满足有反向flow文件和模态为flow的条件
+            self.back_video_list = [VideoRecord(x.strip().split(' ')) for x in open(self.back_train)]
 
     def _parse_list_contrastive(self):  # 此处是加入对比视频数据时数据的处理方式
         if self.test_mode:
@@ -284,12 +289,18 @@ class TSNDataSet(data.Dataset):
 
         return self.get(record, segment_indices)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index):  # dataloader加载数据的时候传入的参数是随机的，对应这里的index
         record = self.video_list[index]
-        if self.args.contrastive:
-            return self._contrastive_getitem(record)  # 使用对比损失时getitem的写法
-        else:
-            return self._common_getitem(record)  # 原始方法的getitem
+        # if self.args.contrastive:
+        #     return self._contrastive_getitem(record)  # 使用对比损失时getitem的写法  这里需要修改返回值不然直接就结束了
+        # else:
+        #     return self._common_getitem(record)  # 原始方法的getitem
+        record_return = self._common_getitem(record)
+        if self.back_train and self.modality == 'Flow':  # 在这里加入对反向flow加载的处理
+            record_back = self.back_video_list[index]
+            record_back_return = self._common_getitem(record_back)
+            return [record_return, record_back_return]  # 满足if语句则同时返回两个图像的返回值
+        return record_return  # 正常情况只有一个返回值
 
 
     # def __getitem__(self, index):
