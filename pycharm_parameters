@@ -1,0 +1,7 @@
+flow test parameters
+ucf101
+Flow
+/home/ange/projects/temporal-segment-networks/data/ucf101_flow_val_split_1.txt
+_flow_checkpoint.pth.tar
+--arch
+resnet101
