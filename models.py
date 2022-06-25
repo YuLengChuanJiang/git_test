@@ -255,56 +255,9 @@ class TSN(nn.Module):
         if self.reshape:
             base_out = base_out.view((-1, self.num_segments) + base_out.size()[1:])  # base_out=[12,3,101]
 
-        consensun_output = self.consensus(base_out).transpose(1,2)  # consensun_output=[12,101,1]
+        output = self.consensus(base_out)
 
-        # a = base_out.view(base_out.shape[0], -1)
-        # att_eff = self.attention_layer(a)
-        # att_baseout = torch.mul(base_out.reshape(-1,base_out.shape[2]), att_eff.view(-1,1)).reshape(base_out.transpose(1,2).shape)
-        # mask = torch.ones(int(base_out.shape[0]), 101, int(base_out.shape[1]))  # mask [12,101,3]
-        # output_ms = self.ms_layer(att_baseout, mask.cuda()).squeeze(0)
-        # output1 =torch.mean(output_ms,dim=2)
- #--------------------------------------------------------------------------------------------------#
- # validate no att
- #        output = base_out.transpose(1,2)
- #        mask = torch.ones(int(base_out.shape[0]), 101, int(base_out.shape[1]))  # mask [12,101,3]
- #        output = self.ms_layer(output, mask.cuda()).squeeze(0)
- #        output =torch.mean(output,dim=2)
-# --------------------------------------------------------------------------------------------------#
-
-# --------------------------------------------------------------------------------------------------#
-# validate no ms only att
-#         a = base_out.view(base_out.shape[0], -1)
-#         att_eff = self.attention_layer(a)
-#         att_baseout = torch.mul(base_out.reshape(-1,base_out.shape[2]), att_eff.view(-1,1)).reshape(base_out.transpose(1,2).shape)
-#         output = torch.sum(att_baseout, dim=2)
-# --------------------------------------------------------------------------------------------------#
-
-# --------------------------------------------------------------------------------------------------#
-# validate no ms no att
-        consensun_output = self.consensus(base_out).transpose(1, 2)
-        output = torch.mean(consensun_output, dim=2)
-# --------------------------------------------------------------------------------------------------#
-
-
-        #tmp = consensun_output.transpose(0,1)  #
-        #tmp1 = base_out.transpose(2, 1)  #  tmp1 = [12,101,3]
-
-        # mask = torch.ones(int(base_out.shape[0]), 101, int(base_out.shape[1]))  # mask [12,101,3]
-        #
-        # output_ms = self.ms_layer(tmp1, mask.cuda())  # [4,12,101,3]  [12,101,3]  [12,101,3]  [num_stage, batch_size,classes,num_segments]
-        #
-        # a = output_ms.view(output_ms.shape[1],-1)   # [batch_size, num_segments*num_class]
-        # output_att = self.attention_layer(a)  # [batch_size, num_segments]
-        # output_ms = output_ms.squeeze(0)  # [batch_size, classes, num_segments]
-        # output_att1 = torch.mul(output_ms.transpose(0,1).reshape(output_ms.shape[1],-1),output_att.view(1,-1))  # [classess, batch_size*num_segments]
-        # output_att2 = output_att1.reshape(output_ms.transpose(0,1).shape).transpose(0,1).transpose(1, 2) # [4,303]  # [bz,ns,cl]
-        #
-        # output1 = torch.sum(output_att2,dim=1)
-
-
-        output = output + consensun_output.squeeze(2)
-
-        return output
+        return output.squeeze(1)
 
     def tsn_ms_att(self, base_out):
         mask = torch.ones(int(base_out.shape[0]), 101, int(base_out.shape[1]))

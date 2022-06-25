@@ -23,6 +23,8 @@ best_prec1 = 0
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
 weight_contrastive = 0.5
 
+# 测试git提交
+
 def main():
     global args, best_prec1         # args是接受命令行输入的全局变量  在这里定义层全局变量
     args = parser.parse_args()      # 获取命令行的输入执行
